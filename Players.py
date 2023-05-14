@@ -89,10 +89,23 @@ class AlphaBetaPlayer(Player):
         # type:(board) -> (float)
         value = 0
         if self.eval_type == 0:
-            value = 0
+            self_score = board.count_score(self.symbol) #use built in function to count # tiles for the player checking score
+            opponent_score = board.count_score(self.oppSym) #use built in to check opponents tiles
+            
+            value = self_score - opponent_score
         elif self.eval_type == 1:
-            value = 1
+            self_legalMoves = 0
+            opp_legalMoves = 0
+            for col in range(board.get_num_cols()): #loop through. check each box and see if it is a legal move for either player. if it is, increment their tally
+                for row in range(board.get_num_rows()):
+                    if board.is_legal_move(col, row, self.symbol):
+                        self_legalMoves += 1
+                    if board.is_legal_move(col, row, self.oppSym):
+                        opp_legalMoves += 1
+
+            value = self_legalMoves - opp_legalMoves #return the difference 
         elif self.eval_type == 2:
+
             value = 2
         return value
 
@@ -100,8 +113,14 @@ class AlphaBetaPlayer(Player):
     def get_successors(self, board, player_symbol):
         # Write function that takes the current state and generates all successors obtained by legal moves
         # type:(board, player_symbol) -> (list)
-        successors = []
-        return successors 
+        successors = [] #list of successors
+        for col in range(board.get_num_cols()):
+            for row in range(board.get_num_rows()):
+                if board.is_legal_move(col, row, player_symbol): #check if that position is a legal move for the player. 
+                    successor = board.cloneOBoard()              #make a clone of the current board
+                    successor.play_move(col, row, player_symbol) #apply the legal move to the board
+                    successors.append(successor)                 #add the potential board state to the list of successors
+        return successors
 
 
     def get_move(self, board):
