@@ -153,12 +153,12 @@ class AlphaBetaPlayer(Player):
         # Write eval function here
         # type:(board) -> (float)
         value = 0
-        if self.eval_type == 0:
+        if self.eval_type == '0':
             self_score = board.count_score(self.symbol) #use built in function to count # tiles for the player checking score
             opponent_score = board.count_score(self.oppSym) #use built in to check opponents tiles
             
             value = self_score - opponent_score
-        elif self.eval_type == 1:
+        elif self.eval_type == '1':
             self_legalMoves = 0
             opp_legalMoves = 0
             for col in range(board.get_num_cols()): #loop through. check each box and see if it is a legal move for either player. if it is, increment their tally
@@ -169,7 +169,8 @@ class AlphaBetaPlayer(Player):
                         opp_legalMoves += 1
 
             value = self_legalMoves - opp_legalMoves #return the difference 
-        elif self.eval_type == 2:
+            
+        elif self.eval_type == '2':
             self_val = 0
             opp_val = 0
             safety_vals = [     #this is a weighted representation of the worth of each location. the worth is based off of how easy it is to capture that spot. this heuristic will try to find the most worth boards possible for the ai
@@ -185,6 +186,8 @@ class AlphaBetaPlayer(Player):
                     if board.get_cell(col, row) == self.oppSym:
                         opp_val += safety_vals[col][row]
             value = self_val - opp_val
+
+        print("eval board returning :", value)
         return value
 
 
