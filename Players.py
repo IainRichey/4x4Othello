@@ -167,8 +167,8 @@ class AlphaBetaPlayer(Player):
                         self_legalMoves += 1
                     if board.is_legal_move(col, row, self.oppSym):
                         opp_legalMoves += 1
-
-            value = self_legalMoves - opp_legalMoves #return the difference 
+            
+            value = self_legalMoves - opp_legalMoves#return the difference 
             
         elif self.eval_type == '2':
             self_val = 0
@@ -187,7 +187,7 @@ class AlphaBetaPlayer(Player):
                         opp_val += safety_vals[col][row]
             value = self_val - opp_val
 
-        print("eval board returning :", value)
+        #print("eval board returning :", value)
         return value
 
 
