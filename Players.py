@@ -77,14 +77,79 @@ class AlphaBetaPlayer(Player):
             return "X"
 
 
+    def max_val(self, board, alpha, beta, depth):
+
+        self.max_depth_seen = max(self.max_depth_seen, depth) #if this is the new deepest we've seen, update it
+
+        if depth == 0 or self.terminal_state(board): #if the depth is 0 or we hit a terminal state
+            return self.eval_board(board), None, None #return the weight of that node
+
+        max_eval = float('-inf')
+
+        max_row = None
+        max_col = None #these are to return the col and row of the best choice. idk if its necessary
+
+        for successor in self.get_successors(board, self.symbol): #check all of the children
+            self.total_nodes_seen += 1 #increase the number of nodes we have seen by 1
+
+            eval, col, row = self.min_val(successor, alpha, beta, depth - 1)
+            if eval >= max_eval:
+                max_eval = eval
+                max_col, max_row = successor.move
+
+                #print("min returning row: ", max_row, "and col: ", max_col)
+                alpha = max(alpha, max_eval) #update alpha
+
+            if alpha >= beta and self.prune == '1': #this is the pruning happening. breaks for loop
+                return max_eval, max_col, max_row
+
+            # alpha = max(alpha, max_eval) 
+
+        #print("min returning row: ", max_row, "and col: ", max_col)
+        return max_eval, max_col, max_row
+
+
+    def min_val(self, board, alpha, beta, depth):  
+        self.max_depth_seen = max(self.max_depth_seen, depth) #if this is the new deepest we've seen, update it
+
+        if depth == 0 or self.terminal_state(board): #if the depth is 0 or we hit a terminal state
+            return self.eval_board(board), None, None #return value of that node
+        
+        min_eval = float('inf')
+        min_row = None
+        min_col = None
+
+        for successor in self.get_successors(board, self.oppSym): #check all of the children
+            self.total_nodes_seen += 1
+            eval, row, col = self.max_val(successor, alpha, beta, depth - 1)
+            if eval <= min_eval:
+                min_eval = eval
+                min_col, min_row = successor.move
+                beta = min(beta, min_eval)
+
+            if alpha >= beta and self.prune == '1': #this is the pruning happening 
+                return min_eval, min_col, min_row
+
+            # beta = min(beta, min_eval) #ccan't have it out here as originally thought, because we only update if it is lower
+        #print("min returning row: ", min_row, "and col: ", min_col)
+        return min_eval, min_col, min_row
+
+
     def alphabeta(self, board):
         # Write minimax function here using eval_board and get_successors
         # type:(board) -> (int, int)
-        col, row = 0, 0
-        return col, row
+        col = None
+        row = None
+        depth = self.max_depth #this is the depth that we will search too. 
+
+        _, col, row = self.max_val(board, float('-inf'), float('inf'), depth - 1)
+
+        #print("returning row: ", row, "and col", col)
+        return (col, row) #I think it must be returned like this
 
 
-    def eval_board(self, board):
+    def eval_board(self, board): 
+        #print("self.eval type is ", self.eval_type)
         # Write eval function here
         # type:(board) -> (float)
         value = 0
@@ -105,8 +170,21 @@ class AlphaBetaPlayer(Player):
 
             value = self_legalMoves - opp_legalMoves #return the difference 
         elif self.eval_type == 2:
-
-            value = 2
+            self_val = 0
+            opp_val = 0
+            safety_vals = [     #this is a weighted representation of the worth of each location. the worth is based off of how easy it is to capture that spot. this heuristic will try to find the most worth boards possible for the ai
+                [2, 1, 1, 2],
+                [1, 0, 0, 1],
+                [1, 0, 0, 1],
+                [2, 1, 1, 2],
+            ]
+            for col in range(board.get_num_cols()): #loop through. check each box and see if it is a legal move for either player. if it is, increment their tally
+                for row in range(board.get_num_rows()):
+                    if board.get_cell(col, row) == self.symbol:
+                        self_val += safety_vals[col][row]
+                    if board.get_cell(col, row) == self.oppSym:
+                        opp_val += safety_vals[col][row]
+            value = self_val - opp_val
         return value
 
 
@@ -119,6 +197,7 @@ class AlphaBetaPlayer(Player):
                 if board.is_legal_move(col, row, player_symbol): #check if that position is a legal move for the player. 
                     successor = board.cloneOBoard()              #make a clone of the current board
                     successor.play_move(col, row, player_symbol) #apply the legal move to the board
+                    successor.move = (col, row) #was missing this for days and nothing was workin lel
                     successors.append(successor)                 #add the potential board state to the list of successors
         return successors
 
@@ -130,7 +209,7 @@ class AlphaBetaPlayer(Player):
 
        
         
-
+#HAHAHHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAh
 
 
 
